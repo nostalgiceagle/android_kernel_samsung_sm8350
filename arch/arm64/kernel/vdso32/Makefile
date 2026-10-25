@@ -13,11 +13,15 @@ ifeq ($(CONFIG_CC_IS_CLANG), y)
 COMPAT_GCC_TOOLCHAIN_DIR := $(dir $(shell which $(CROSS_COMPILE_COMPAT)elfedit))
 COMPAT_GCC_TOOLCHAIN := $(realpath $(COMPAT_GCC_TOOLCHAIN_DIR)/..)
 
-CC_COMPAT_CLANG_FLAGS := --target=$(notdir $(CROSS_COMPILE_COMPAT:%-=%))
+COMPAT_TRIPLE := $(subst androidkernel,linux-gnueabi,$(notdir $(CROSS_COMPILE_COMPAT:%-=%)))
+CC_COMPAT_CLANG_FLAGS := --target=$(COMPAT_TRIPLE)
+CC_COMPAT_CLANG_FLAGS += -Qunused-arguments
+ifneq ($(LLVM_IAS),1)
 CC_COMPAT_CLANG_FLAGS += --prefix=$(COMPAT_GCC_TOOLCHAIN_DIR)
-CC_COMPAT_CLANG_FLAGS += -no-integrated-as -Qunused-arguments
+CC_COMPAT_CLANG_FLAGS += -no-integrated-as
 ifneq ($(COMPAT_GCC_TOOLCHAIN),)
 CC_COMPAT_CLANG_FLAGS += --gcc-toolchain=$(COMPAT_GCC_TOOLCHAIN)
+endif
 endif
 
 CC_COMPAT ?= $(CC)
@@ -51,7 +55,7 @@ VDSO_CPPFLAGS += $(LINUXINCLUDE)
 # From top-level Makefile
 VDSO_CAFLAGS := $(VDSO_CPPFLAGS)
 ifneq ($(shell $(CC_COMPAT) --version 2>&1 | head -n 1 | grep clang),)
-VDSO_CAFLAGS += --target=$(notdir $(CROSS_COMPILE_COMPAT:%-=%))
+VDSO_CAFLAGS += --target=$(COMPAT_TRIPLE)
 endif
 
 VDSO_CAFLAGS += $(call cc32-option,-fno-PIE)
