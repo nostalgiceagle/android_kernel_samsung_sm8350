@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+#define FOD_PRESSED_LAYER_ZORDER 0x20000000u
+
 /* Total number of supported color planes */
 #define SDE_MAX_PLANES  4
 
